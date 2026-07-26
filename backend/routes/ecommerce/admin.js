@@ -128,6 +128,27 @@ export const adminRoutes = (app) => {
         adminCustomerController.getAllCustomers
     )
 
+    app.get(
+        "/admin/customers/:id",
+        authMiddleware,
+        adminMiddleware,
+        adminCustomerController.getCustomerById
+    )
+
+    app.put(
+        "/admin/customers/:id",
+        authMiddleware,
+        adminMiddleware,
+        adminCustomerController.updateCustomer
+    )
+
+    app.delete(
+        "/admin/customers/:id",
+        authMiddleware,
+        adminMiddleware,
+        adminCustomerController.deleteCustomer
+    )
+
     app.post(
         "/admin/campaigns",
         authMiddleware,

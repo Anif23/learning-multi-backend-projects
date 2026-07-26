@@ -111,6 +111,34 @@ export const adminCustomerController = {
                     ),
             });
         }
-    )
+    ),
+
+    getCustomerById: asyncHandler(async (req, res) => {
+        const customer = await prisma.user.findUnique({
+            where: { id: Number(req.params.id) },
+            include: {
+                orders: true,
+                addresses: true,
+                wishlist: { include: { items: true } },
+                notifications: { orderBy: { createdAt: "desc" } }
+            }
+        });
+        if (!customer) return res.status(404).json({ success: false, message: "Customer not found" });
+        res.json({ success: true, data: customer });
+    }),
+
+    updateCustomer: asyncHandler(async (req, res) => {
+        const { username, email } = req.body;
+        const customer = await prisma.user.update({
+            where: { id: Number(req.params.id) },
+            data: { username, email }
+        });
+        res.json({ success: true, data: customer });
+    }),
+
+    deleteCustomer: asyncHandler(async (req, res) => {
+        await prisma.user.delete({ where: { id: Number(req.params.id) } });
+        res.json({ success: true, message: "Customer deleted successfully" });
+    })
 
 };

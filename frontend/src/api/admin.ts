@@ -24,6 +24,9 @@ export const adminAPI = {
     api.put(`/admin/orders/${id}/payment`, data),
 
   customers: (params: any) => api.get("/admin/customers", { params }),
+  customer: (id: number | string) => api.get(`/admin/customers/${id}`),
+  updateCustomer: (id: number | string, data: any) => api.put(`/admin/customers/${id}`, data),
+  deleteCustomer: (id: number | string) => api.delete(`/admin/customers/${id}`),
 
   createCampaign: (data: any) => api.post("/admin/campaigns", data),
   getCampaigns: (params?: any) => api.get("/admin/campaigns", { params }),

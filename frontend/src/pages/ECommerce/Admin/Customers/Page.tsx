@@ -18,11 +18,20 @@ import Pagination from "../../../../components/Ecommerce/Admin/Pagination";
 
 import {
   useAdminCustomers,
+  useUpdateCustomer,
+  useDeleteCustomer,
 } from "../../../../hooks/admin/useAdminCustomer";
 
 const Customers = () => {
   const navigate =
     useNavigate();
+
+  const updateCustomer = useUpdateCustomer();
+  const deleteCustomer = useDeleteCustomer();
+
+  const [editingCustomer, setEditingCustomer] = useState<any | null>(null);
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
 
   const [page, setPage] =
     useState(1);
@@ -38,6 +47,25 @@ const Customers = () => {
 
   const customers =
     data?.data || [];
+
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCustomer) return;
+    updateCustomer.mutate(
+      { id: editingCustomer.id, data: { username, email } },
+      {
+        onSuccess: () => {
+          setEditingCustomer(null);
+        },
+      }
+    );
+  };
+
+  const handleDelete = (row: any) => {
+    if (window.confirm(`Are you sure you want to delete customer ${row.username}?`)) {
+      deleteCustomer.mutate(row.id);
+    }
+  };
 
   const pg =
     data?.pagination || {};
@@ -183,8 +211,60 @@ const Customers = () => {
             navigate(
               `/admin/ecommerce/customer/${row.id}`
             ),
+          onEdit: (row) => {
+            setEditingCustomer(row);
+            setUsername(row.username);
+            setEmail(row.email);
+          },
+          onDelete: handleDelete,
         }}
       />
+
+      {editingCustomer && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-xl border">
+            <h3 className="text-xl font-bold mb-4">Edit Customer</h3>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input
+                  type="text"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-black"
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingCustomer(null)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updateCustomer.isPending}
+                  className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-neutral-800 rounded-xl disabled:bg-gray-400"
+                >
+                  {updateCustomer.isPending ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Pagination
         page={pg.page}
